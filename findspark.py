@@ -1,3 +1,4 @@
+
 """Find spark home, and initialize by adding pyspark to sys.path.
 
 If SPARK_HOME is defined, it will be used to put pyspark on sys.path.
@@ -7,6 +8,7 @@ Otherwise, common locations for spark will be searched.
 from glob import glob
 import os
 import sys
+import argparse
 
 __version__ = "2.0.1"
 
@@ -117,11 +119,70 @@ def _edit_ipython_profile(spark_home, sys_path=None):
         startup_file.write("import pyspark\n")
 
 
-def init(spark_home=None, python_path=None, edit_rc=False, edit_profile=False):
-    """Make pyspark importable.
+# def init(spark_home=None, python_path=None, edit_rc=False, edit_profile=False):
+#     """Make pyspark importable.
+#
+#     Sets environment variables and adds dependencies to sys.path.
+#     If no Spark location is provided, will try to find an installation.
+#
+#     Parameters
+#     ----------
+#     spark_home : str, optional, default = None
+#         Path to Spark installation, will try to find automatically
+#         if not provided.
+#     python_path : str, optional, default = None
+#         Path to Python for Spark workers (PYSPARK_PYTHON),
+#         will use the currently running Python if not provided.
+#     edit_rc : bool, optional, default = False
+#         Whether to attempt to persist changes by appending to shell
+#         config.
+#     edit_profile : bool, optional, default = False
+#         Whether to create an IPython startup file to automatically
+#         configure and import pyspark.
+#     """
+#
+#     if not spark_home:
+#         spark_home = find()
+#
+#     if not python_path:
+#         python_path = os.environ.get("PYSPARK_PYTHON", sys.executable)
+#
+#     # ensure SPARK_HOME is defined
+#     os.environ["SPARK_HOME"] = spark_home
+#
+#     # ensure PYSPARK_PYTHON is defined
+#     os.environ["PYSPARK_PYTHON"] = python_path
+#
+#     # add pyspark to sys.path
+#
+#     if "pyspark" not in sys.modules:
+#         spark_python = os.path.join(spark_home, "python")
+#         try:
+#             py4j = glob(os.path.join(spark_python, "lib", "py4j-*.zip"))[0]
+#         except IndexError:
+#             raise Exception(
+#                 "Unable to find py4j in {}, your SPARK_HOME may not be configured correctly".format(
+#                     spark_python
+#                 )
+#             )
+#         sys.path[:0] = sys_path = [spark_python, py4j]
+#     else:
+#         # already imported, no need to patch sys.path
+#         sys_path = None
+#
+#     if edit_rc:
+#         _edit_rc(spark_home, sys_path)
+#
+#     if edit_profile:
+#         _edit_ipython_profile(spark_home, sys_path)
+
+# 假设其他函数如 find, _edit_rc, _edit_ipython_profile 等已经定义好
+def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, edit_profile=False, args=None):
+    """Make pyspark importable and initializes a SparkSession.
 
     Sets environment variables and adds dependencies to sys.path.
     If no Spark location is provided, will try to find an installation.
+    Optionally parses command line arguments and initializes a SparkSession.
 
     Parameters
     ----------
@@ -137,6 +198,13 @@ def init(spark_home=None, python_path=None, edit_rc=False, edit_profile=False):
     edit_profile : bool, optional, default = False
         Whether to create an IPython startup file to automatically
         configure and import pyspark.
+    args : argparse.Namespace, optional, default = None
+        Parsed command line arguments to be used for initializing SparkSession.
+
+    Returns
+    -------
+    SparkSession
+        A SparkSession instance initialized with given parameters.
     """
 
     if not spark_home:
@@ -145,14 +213,22 @@ def init(spark_home=None, python_path=None, edit_rc=False, edit_profile=False):
     if not python_path:
         python_path = os.environ.get("PYSPARK_PYTHON", sys.executable)
 
-    # ensure SPARK_HOME is defined
+    # 确保 SPARK_HOME 和 PYSPARK_PYTHON 被设置
     os.environ["SPARK_HOME"] = spark_home
+    # os.environ["PYSPARK_PYTHON"] = python_path
 
-    # ensure PYSPARK_PYTHON is defined
-    os.environ["PYSPARK_PYTHON"] = python_path
+    # 获取环境变量 PYSPARK_PYTHON 的值
+    py_spark_python = os.environ.get('PYSPARK_PYTHON')
 
-    # add pyspark to sys.path
+    # 如果 PYSPARK_PYTHON 不存在，则设置一个默认值
+    if py_spark_python is None:
+        default_python_path = './environment/bin/python'
+        os.environ['PYSPARK_PYTHON'] = default_python_path
+        print(f"Set PYSPARK_PYTHON to {default_python_path}")
+    else:
+        print(f"PYSPARK_PYTHON is already set to {py_spark_python}, no action needed.")
 
+    # 将 pyspark 添加到 sys.path
     if "pyspark" not in sys.modules:
         spark_python = os.path.join(spark_home, "python")
         try:
@@ -165,7 +241,7 @@ def init(spark_home=None, python_path=None, edit_rc=False, edit_profile=False):
             )
         sys.path[:0] = sys_path = [spark_python, py4j]
     else:
-        # already imported, no need to patch sys.path
+        # 如果已经导入 pyspark，就不需要再修改 sys.path
         sys_path = None
 
     if edit_rc:
@@ -173,6 +249,29 @@ def init(spark_home=None, python_path=None, edit_rc=False, edit_profile=False):
 
     if edit_profile:
         _edit_ipython_profile(spark_home, sys_path)
+
+    # 根据 args 参数初始化 SparkSession
+    from pyspark.sql import SparkSession
+    builder = SparkSession.builder
+
+    if args:
+        assert isinstance(args, argparse.Namespace), "args must be an instance of argparse.Namespace"
+
+        # 构建 SparkSession 配置
+        # builder = builder.appName(args.appName or "MyApp")
+        builder = builder.master(args.master or "local[*]")
+
+        # 添加其他配置参数
+        for arg in vars(args):
+            if arg.startswith("spark."):
+                value = getattr(args, arg)
+                if value is not None:
+                    builder = builder.config(arg, value)
+
+    # 创建 SparkSession
+    spark_session = builder.getOrCreate()
+
+    return spark_session
 
 
 def _add_to_submit_args(to_add):

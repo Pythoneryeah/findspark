@@ -1,3 +1,4 @@
+
 # Find spark
 
 PySpark isn't on sys.path by default, but that doesn't mean it can't be used as a regular library.
@@ -48,3 +49,10 @@ findspark.init('/path/to/spark_home', edit_rc=True)
 ```
 
 If changes are persisted, findspark will not need to be called again unless the spark installation is moved.
+
+python setup.py sdist
+conda install pyspark -y
+
+# conda 打包
+conda install --use-local findspark_msxf-1.0-0.tar.bz2
+conda build --output-folder ./out/ conda/
