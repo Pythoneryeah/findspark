@@ -287,6 +287,11 @@ def init(spark_home="/opt/spark-msxf-3.2.1",
                 if value is not None:
                     builder = builder.config(arg, value)
     
+    yarn_queue_name = get_yarn_queue_name('/tmp/pySparkParam.txt')
+    if yarn_queue_name:
+        print(f"spark.yarn.queue: {yarn_queue_name}")
+        builder = builder.config("spark.yarn.queue", yarn_queue_name)
+    
     if package_path:
         builder.config("spark.yarn.dist.archives", package_path)
     # 创建 SparkSession
@@ -412,3 +417,19 @@ def export_conda_env_yaml_and_compute_md5(envName, forcePackage=False):
     print(f"Packed conda environment stored at: {output_path}")
 
     return output_path
+
+def get_yarn_queue_name(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                if line.startswith('yarnQueueName'):
+                    # 分割字符串并获取值
+                    return line.split('=')[1].strip().strip(',')
+    except Exception:
+        print(f"get queue error.")
+        return None
+
+# 使用示例
+yarn_queue_name = get_yarn_queue_name('/tmp/pySparkParam.txt')
+print(yarn_queue_name)
+
