@@ -9,6 +9,7 @@ from glob import glob
 import os
 import sys
 import argparse
+from condaUtils import export_conda_env_yaml_and_compute_md5
 
 __version__ = "2.0.1"
 
@@ -108,7 +109,7 @@ def _edit_ipython_profile(spark_home, sys_path=None):
 
         profile_dir = locate_profile()
 
-    startup_file_loc = os.path.join(profile_dir, "startup", "findspark.py")
+    startup_file_loc = os.path.join(profile_dir, "startup", "findspark_msxf.py")
 
     with open(startup_file_loc, "w") as startup_file:
         # Lines of code to be run when IPython starts
@@ -177,7 +178,7 @@ def _edit_ipython_profile(spark_home, sys_path=None):
 #         _edit_ipython_profile(spark_home, sys_path)
 
 # 假设其他函数如 find, _edit_rc, _edit_ipython_profile 等已经定义好
-def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, edit_profile=False, args=None):
+def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, edit_profile=False, args=None, envName=None, forcePackage=False):
     """Make pyspark importable and initializes a SparkSession.
 
     Sets environment variables and adds dependencies to sys.path.
@@ -249,6 +250,12 @@ def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, ed
 
     if edit_profile:
         _edit_ipython_profile(spark_home, sys_path)
+        
+    # 打包conda环境
+    if envName:
+        package_path = export_conda_env_yaml_and_compute_md5(envName, forcePackage)
+    else:
+        package_path = None
 
     # 根据 args 参数初始化 SparkSession
     from pyspark.sql import SparkSession
@@ -267,7 +274,9 @@ def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, ed
                 value = getattr(args, arg)
                 if value is not None:
                     builder = builder.config(arg, value)
-
+    
+    if package_path:
+        builder.config("spark.yarn.dist.archives", package_path)
     # 创建 SparkSession
     spark_session = builder.getOrCreate()
 

@@ -1,0 +1,33 @@
+{% set name = "findspark_msxf" %}
+{% set version = "1.0" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  git_url: https://github.com/Pythoneryeah/findspark.git
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+
+about:
+  home: "https://github.com/Pythoneryeah/findspark"
+  license: "BSD (3-clause)"
+  license_family: BSD
+  license_file: 
+  summary: "Find pyspark to make it importable."
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - your-github-id-here

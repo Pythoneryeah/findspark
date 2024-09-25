@@ -8,19 +8,19 @@ if any(arg.startswith('bdist') for arg in sys.argv):
     import setuptools
 
 version_ns = {}
-with open('findspark.py') as f:
+with open('findspark_msxf.py') as f:
     for line in f:
         if line.startswith('__version__'):
             exec(line, version_ns)
             break
     
 setup(
-    name='findspark',
+    name='findspark_msxf',
     version=version_ns['__version__'],
-    py_modules=['findspark'],
+    py_modules=['findspark_msxf'],
     description="Find pyspark to make it importable.",
     long_description="""
-        Provides findspark.init() to make pyspark importable as a regular library.
+        Provides findspark_msxf.init() to make pyspark importable as a regular library.
     """,
     license="BSD (3-clause)",
     author="Min RK",

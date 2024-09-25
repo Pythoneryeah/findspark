@@ -1,9 +1,0 @@
-package:
-  name: "findspark_msxf"
-  version: "1.0"
-about:
-  summary: "This is an awesome Python library"
-source:
-  path: ..
-build:
-  script: python setup.py install

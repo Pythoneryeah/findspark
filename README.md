@@ -56,3 +56,5 @@ conda install pyspark -y
 # conda 打包
 conda install --use-local findspark_msxf-1.0-0.tar.bz2
 conda build --output-folder ./out/ conda/
+conda-build findspark
+tar -zcvf findspark-msxf.tar.gz ./conda-bld/
