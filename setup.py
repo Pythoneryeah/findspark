@@ -17,7 +17,7 @@ with open('findspark_msxf.py') as f:
 setup(
     name='findspark_msxf',
     version=version_ns['__version__'],
-    py_modules=['findspark_msxf, condaUtils'],
+    py_modules=['findspark_msxf'],
     description="Find pyspark to make it importable.",
     long_description="""
         Provides findspark_msxf.init() to make pyspark importable as a regular library.
