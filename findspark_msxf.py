@@ -266,8 +266,8 @@ def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, ed
         assert isinstance(args, argparse.Namespace), "args must be an instance of argparse.Namespace"
 
         # 构建 SparkSession 配置
-        # builder = builder.appName(args.appName or "MyApp")
-        builder = builder.master(args.master or "local[*]")
+        builder = builder.appName(getattr(args, 'appName', "pyspark_app"))
+        builder = builder.master(getattr(args, 'master', "local[*]"))
 
         # 添加其他配置参数
         for arg in vars(args):
