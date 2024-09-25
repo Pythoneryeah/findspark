@@ -179,7 +179,14 @@ def _edit_ipython_profile(spark_home, sys_path=None):
 #         _edit_ipython_profile(spark_home, sys_path)
 
 # 假设其他函数如 find, _edit_rc, _edit_ipython_profile 等已经定义好
-def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, edit_profile=False, args=None, envName=None, forcePackage=False):
+def init(spark_home="/opt/spark-msxf-3.2.1", 
+         python_path=None, 
+         edit_rc=False, 
+         edit_profile=False, 
+         args=None, 
+         envName=None, 
+         forcePackage=False,
+         appName=None):
     """Make pyspark importable and initializes a SparkSession.
 
     Sets environment variables and adds dependencies to sys.path.
@@ -266,7 +273,11 @@ def init(spark_home="/opt/spark-msxf-3.2.1", python_path=None, edit_rc=False, ed
         assert isinstance(args, argparse.Namespace), "args must be an instance of argparse.Namespace"
 
         # 构建 SparkSession 配置
-        builder = builder.appName(getattr(args, 'appName', "pyspark_app"))
+        if appName is None:
+            appName = 'pyspark_app'
+
+        builder = builder.appName(appName)
+        # builder = builder.appName(getattr(args, 'appName', "pyspark_app"))
         builder = builder.master(getattr(args, 'master', "local[*]"))
 
         # 添加其他配置参数
@@ -355,7 +366,7 @@ def export_conda_env_yaml_and_compute_md5(envName, forcePackage=False):
     
     yaml_content = result.stdout
     
-    print(f"yaml_content: {yaml_content}")
+    # print(f"yaml_content: {yaml_content}")
 
     # 计算MD5值
     md5_hash = hashlib.md5(yaml_content.encode('utf-8')).hexdigest()
@@ -367,7 +378,7 @@ def export_conda_env_yaml_and_compute_md5(envName, forcePackage=False):
     # 强制打包
     if forcePackage:
         print(f"是否强制打包: {forcePackage}")
-        old_files = glob.glob(os.path.join("/tmp/env", f"{envName}_*.tar.gz"))
+        old_files = glob(os.path.join("/tmp/env", f"{envName}_*.tar.gz"))
         for old_file in old_files:
             os.remove(old_file)
             print(f"Deleted old file: {old_file}")
@@ -387,7 +398,7 @@ def export_conda_env_yaml_and_compute_md5(envName, forcePackage=False):
         return output_path
 
     # 删除同一环境下的旧包
-    old_files = glob.glob(os.path.join("/tmp/env", f"{envName}_*.tar.gz"))
+    old_files = glob(os.path.join("/tmp/env", f"{envName}_*.tar.gz"))
     for old_file in old_files:
         os.remove(old_file)
         print(f"Deleted old file: {old_file}")
