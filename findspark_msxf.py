@@ -9,7 +9,7 @@ from glob import glob
 import os
 import sys
 import argparse
-from condaUtils import export_conda_env_yaml_and_compute_md5
+from .condaUtils import export_conda_env_yaml_and_compute_md5
 
 __version__ = "2.0.1"
 
