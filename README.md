@@ -60,7 +60,14 @@ conda build --output-folder ./out/ conda/
 
 conda-build findspark
 
+
+
 tar -zcvf findspark-msxf.tar.gz ./conda-bld/
+
+/root/anaconda3/envs/myenv
+
+mv findspark-msxf.tar.gz /workspaces/vscode-python-manager/
+
 
 tar -tvjf /root/anaconda3/envs/myenv/conda-bld/linux-64/findspark_msxf-1.1.3-py38_0.tar.bz2
 

@@ -429,7 +429,4 @@ def get_yarn_queue_name(file_path):
         print(f"get queue error.")
         return None
 
-# 使用示例
-yarn_queue_name = get_yarn_queue_name('/tmp/pySparkParam.txt')
-print(yarn_queue_name)
 
