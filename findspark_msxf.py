@@ -293,7 +293,7 @@ def init(spark_home="/opt/spark-msxf-3.2.1",
         builder = builder.config("spark.yarn.queue", yarn_queue_name)
     
     if package_path:
-        builder.config("spark.yarn.dist.archives", package_path)
+        builder.config("spark.yarn.dist.archives", f"{package_path}#environment")
     # 创建 SparkSession
     spark_session = builder.getOrCreate()
 
