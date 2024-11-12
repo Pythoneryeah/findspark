@@ -260,7 +260,7 @@ def init(spark_home="/opt/spark-msxf-3.2.1",
         _edit_ipython_profile(spark_home, sys_path)
         
     # 打包conda环境
-    if envName:
+    if envName and os.getenv('JUPYTER_TOKEN'):
         package_path = export_conda_env_yaml_and_compute_md5(envName, forcePackage)
     else:
         package_path = None

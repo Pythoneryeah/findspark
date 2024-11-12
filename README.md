@@ -104,3 +104,12 @@ if __name__ == "__main__":
 
     args, unknown = parser.parse_known_args()
     main(args)
+
+
+
+# 打包
+1. cd 到findspark目录
+2. conda-build findspark
+3. cd 到 /root/anaconda3/envs/myenv/conda-bld/
+4. tar -zcvf findspark-msxf.tar.gz ./conda-bld/
+5. mv findspark-msxf.tar.gz /workspaces/vscode-python-manager/
